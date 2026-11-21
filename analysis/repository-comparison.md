@@ -25,7 +25,7 @@ ASE 已确定：模块化单体、FastAPI、LangGraph、Pydantic V2、PostgreSQL
 | PostgreSQL | 依赖里有 SQLAlchemy，源码未 import | 未找到 | 有，SQLAlchemy 模型 + Alembic | 未找到 | 未找到 | 未找到 | SQLite 任务存储，不是 PostgreSQL |
 | Docker 隔离执行 | `DockerWorkspace`，另有 agent-server docker runtime | UI 连接远程 runtime | 通过 sandbox 找 agent-server URL | 未作为 Agent 沙箱读到 | `DockerEnvironment.execute` 走 `docker exec` | `docker/Dockerfile` 是应用镜像，不是命令沙箱 | 未作为执行沙箱读到 |
 | Git Worktree | agent-server `git worktree add` | UI 消费服务端会话 | 未在已读路径中找到 worktree 创建 | 未找到 | 未找到 | 未找到 | VS Code `createWorktree` |
-| 人工审批 | `ConfirmationPolicy` + `WAITING_FOR_CONFIRMATION` | `useRespondToConfirmation` | 运行状态可取消，不是动作级确认 | `Role.is_human` 只是字段 | `InteractiveAgent` 的 `confirm` | 命令需用户输入，无策略对象 | `requestToolApproval` |
+| 人工审批 | `ConfirmationPolicy` + `WAITING_FOR_CONFIRMATION` | `useRespondToConfirmation` | 运行状态可取消，不是动作级确认 | `AskReview` / `Planner.ask_review` 终端确认；`auto_run=True` 时跳过 | `InteractiveAgent` 的 `confirm` | 命令需用户输入，无策略对象 | `requestToolApproval` |
 | 多 Agent | `register_agent`、`TaskTool`、子会话 | 展示子会话 | 一次运行对应一个 agent-server 会话 | `Team` + `Environment` | 单 Agent 协议 | `ArchitectCoder` 是编辑格式，不是运行时团队 | `AgentTeam`、`TeamChildSessionManager` |
 | 可替换执行器 | `BaseWorkspace` / `RemoteWorkspace` | 不执行代码 | 不执行代码 | `Environment.execute` 不是语言无关 RPC | `Environment` Protocol | 直接 `subprocess` / `pexpect` | 工具在 TS runtime 内 |
 

@@ -64,7 +64,7 @@ cline：`requestToolApproval` 是注入的回调。任务表还有独立的人�
 
 aider：用户在提示符决定下一条输入；`/run` 由 `Commands.cmd_run` 执行命令。没有 `should_confirm(risk)` 这种策略对象。
 
-MetaGPT：`Role.is_human` 是布尔字段。已读的 `react` 路径没有审批门。
+MetaGPT：`Role.is_human` 只决定是否使用 `HumanProvider`，不是确认策略。人工确认在另一条路径：`Planner.ask_review`（`metagpt/strategy/planner.py`）在 `auto_run` 为假时调用 `AskReview.run`（`metagpt/actions/di/ask_review.py`），用终端输入 `confirm` / `change` / `exit` 决定任务是否完成。`auto_run` 为真时不再询问，只看 `task_result.is_success`。`RoleZero.ask_human` 仅在环境是 `MGXEnv` 时调用 `MGXEnv.ask_human`，否则返回 “Not in MGXEnv”。这是终端问答，没有风险等级，也没有“暂停在某个工具调用上”的状态。
 
 automation：没有动作级审批。
 

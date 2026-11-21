@@ -54,7 +54,7 @@ webhook 有 `webhook_policy.py` 与 `webhook_router.py`。已读路径没有 `Se
 
 ## MetaGPT
 
-未找到确认策略或 shell AST 分析。`Role.is_human` 只标记角色。密钥放在 `config2.yaml` 的 `llm.api_key`。执行动作继承普通 Python 进程权限。
+没有 `should_confirm(risk)` 或 shell AST。`Role.is_human` 只选择 `HumanProvider`。计划确认是 `AskReview`：`Planner.ask_review` 在非 `auto_run` 时读终端输入，`confirm`/`continue`/`yes` 视为通过，`exit` 直接结束进程。`RoleZero.ask_human` 只在 `MGXEnv` 里生效。密钥放在 `config2.yaml` 的 `llm.api_key`。`Terminal` 有一小段禁止命令，执行动作仍继承普通 Python 进程权限。
 
 ## cline
 

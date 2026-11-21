@@ -67,7 +67,7 @@ SQLAlchemy 2 异步会话 + Alembic。状态枚举对齐 `AutomationRunStatus`�
 
 - 本机可信仓库：`LocalWorkspace`
 - 默认不可信仓库：`DockerWorkspace`
-- Go/C/C++：独立进程实现与 `RemoteWorkspace` 相同的 HTTP，ASE 不嵌入这些语言
+- Go/C/C++：命令和文件走与 `RemoteWorkspace` 相同的 HTTP。工具若不想写 Python `ToolExecutor`，用 MCP：`MCPServer`（`openhands-sdk/openhands/sdk/mcp/config.py`）的传输是 `stdio`、`http`、`streamable-http` 或 `sse`。`ToolExecutor` 本身是 Python 抽象类，不是跨语言 ABI
 
 Worktree 在调用执行器之前创建。命令序列与 `conversation_service._create_conversation_worktree` 保持一致：`git worktree add -b <prefix><run_id> <path> <start>`。删除时 `git worktree prune`，分支保留，与 `remove_conversation_worktree` 相同。执行器只接收目录，不知道 LangGraph。
 
