@@ -1,0 +1,265 @@
+diff --git a/calculator.py b/calculator.py
+index 03b5693..43b1c25 100644
+--- a/calculator.py
++++ b/calculator.py
+@@ -1,6 +1,119 @@
++"""A small arithmetic expression evaluator.
++
++Grammar (recursive descent, lowest precedence first)::
++
++    expression := term (('+' | '-') term)*
++    term       := unary (('*' | '/') unary)*
++    unary      := ('+' | '-') unary | power
++    power      := primary ('^' unary)?          # right associative
++    primary    := NUMBER | '(' expression ')'
++
++Numbers may use scientific notation, e.g. ``1.5e2``, ``2E-3``, ``.5e+1``.
++"""
++
++from __future__ import annotations
++
++import re
++
++__all__ = ["add", "evaluate", "ExpressionError"]
++
++_NUMBER_RE = re.compile(r"(?:\d+\.?\d*|\.\d+)(?:[eE][+-]?\d+)?")
++_WHITESPACE_RE = re.compile(r"\s+")
++
++
++class ExpressionError(ValueError):
++    """Raised when an expression is malformed."""
++
++
+ def add(left: float, right: float) -> float:
+     return left + right
+ 
+ 
++class _Parser:
++    def __init__(self, text: str) -> None:
++        self._text = text
++        self._pos = 0
++
++    def parse(self) -> float:
++        value = self._expression()
++        self._skip_whitespace()
++        if self._pos != len(self._text):
++            raise ExpressionError(
++                f"unexpected character {self._text[self._pos]!r} at position {self._pos}"
++            )
++        return value
++
++    def _skip_whitespace(self) -> None:
++        match = _WHITESPACE_RE.match(self._text, self._pos)
++        if match:
++            self._pos = match.end()
++
++    def _peek(self) -> str:
++        self._skip_whitespace()
++        return self._text[self._pos] if self._pos < len(self._text) else ""
++
++    def _consume(self, char: str) -> bool:
++        if self._peek() == char:
++            self._pos += 1
++            return True
++        return False
++
++    def _expression(self) -> float:
++        value = self._term()
++        while True:
++            if self._consume("+"):
++                value += self._term()
++            elif self._consume("-"):
++                value -= self._term()
++            else:
++                return value
++
++    def _term(self) -> float:
++        value = self._unary()
++        while True:
++            if self._consume("*"):
++                value *= self._unary()
++            elif self._consume("/"):
++                divisor = self._unary()
++                if divisor == 0:
++                    raise ExpressionError("division by zero")
++                value /= divisor
++            else:
++                return value
++
++    def _unary(self) -> float:
++        if self._consume("+"):
++            return self._unary()
++        if self._consume("-"):
++            return -self._unary()
++        return self._power()
++
++    def _power(self) -> float:
++        base = self._primary()
++        if self._consume("^"):
++            return base ** self._unary()
++        return base
++
++    def _primary(self) -> float:
++        if self._consume("("):
++            value = self._expression()
++            if not self._consume(")"):
++                raise ExpressionError(f"missing ')' at position {self._pos}")
++            return value
++
++        self._skip_whitespace()
++        match = _NUMBER_RE.match(self._text, self._pos)
++        if not match:
++            found = self._text[self._pos] if self._pos < len(self._text) else "end of input"
++            raise ExpressionError(f"expected a number at position {self._pos}, found {found!r}")
++        self._pos = match.end()
++        return float(match.group())
++
++
+ def evaluate(expression: str) -> float:
+-    raise NotImplementedError(expression)
++    """Evaluate an arithmetic expression and return its value as a float."""
++    if not isinstance(expression, str):
++        raise TypeError("expression must be a string")
++    if not expression.strip():
++        raise ExpressionError("empty expression")
++    return _Parser(expression).parse()
+diff --git a/test_calculator.py b/test_calculator.py
+index 93037ca..083a6de 100644
+--- a/test_calculator.py
++++ b/test_calculator.py
+@@ -1,12 +1,131 @@
+ import pytest
+ 
+-from calculator import add, evaluate
++from calculator import ExpressionError, add, evaluate
+ 
+ 
+ def test_add() -> None:
+     assert add(1, 2) == 3
+ 
+ 
+-def test_scientific_notation_is_not_implemented() -> None:
+-    with pytest.raises(NotImplementedError):
+-        evaluate("1.5e2")
++@pytest.mark.parametrize(
++    ("expression", "expected"),
++    [
++        ("1.5e2", 150.0),
++        ("1e3", 1000.0),
++        ("1E3", 1000.0),
++        ("2.5e-3", 0.0025),
++        ("2.5E-3", 0.0025),
++        ("1e+2", 100.0),
++        ("1e0", 1.0),
++        (".5e1", 5.0),
++        ("5.e1", 50.0),
++        ("-1.5e2", -150.0),
++        ("+1.5e2", 150.0),
++        ("1e-3 * 1e3", 1.0),
++        ("6.02e23 / 3.01e23", pytest.approx(2.0)),
++    ],
++)
++def test_scientific_notation(expression: str, expected: float) -> None:
++    assert evaluate(expression) == expected
++
++
++@pytest.mark.parametrize(
++    ("expression", "expected"),
++    [
++        ("1 + 2", 3.0),
++        ("5 - 8", -3.0),
++        ("2 * 3", 6.0),
++        ("7 / 2", 3.5),
++        ("1 + 2 * 3", 7.0),
++        ("2 * 3 + 1", 7.0),
++        ("10 - 2 * 3", 4.0),
++        ("10 - 2 - 3", 5.0),
++        ("100 / 10 / 2", 5.0),
++        ("2 + 3 * 4 - 6 / 3", 12.0),
++        ("2 ^ 3", 8.0),
++        ("2 * 3 ^ 2", 18.0),
++        ("2 ^ 3 ^ 2", 512.0),
++        ("-2 ^ 2", -4.0),
++        ("(-2) ^ 2", 4.0),
++        ("2 * -3", -6.0),
++        ("-2 * -3", 6.0),
++        ("--5", 5.0),
++        ("1.5e2 + 2.5E-1 * (3 - 1)", 150.5),
++    ],
++)
++def test_operator_precedence(expression: str, expected: float) -> None:
++    assert evaluate(expression) == expected
++
++
++@pytest.mark.parametrize(
++    ("expression", "expected"),
++    [
++        ("(1 + 2) * 3", 9.0),
++        ("((1 + 2) * (3 + 4))", 21.0),
++        ("2 * (3 + (4 - 1))", 12.0),
++        ("(1.5e2)", 150.0),
++        ("(1e2 + 1e2) / (2e0)", 100.0),
++        ("-(3 + 4)", -7.0),
++        ("(2 + 3) ^ 2", 25.0),
++        ("2 ^ (1 + 2)", 8.0),
++        ("( ( 1 + 2 ) * 3 )", 9.0),
++    ],
++)
++def test_parentheses(expression: str, expected: float) -> None:
++    assert evaluate(expression) == expected
++
++
++@pytest.mark.parametrize(
++    ("expression", "expected"),
++    [
++        ("0.1 + 0.2", pytest.approx(0.3)),
++        ("1.5 + 2.25", 3.75),
++        ("3.0 / 4.0", 0.75),
++        ("1.25 * 4", 5.0),
++        ("0.5 - 1.5", -1.0),
++        ("1e-10 + 1e-10", pytest.approx(2e-10)),
++        ("1.23456789e8 * 1e-8", pytest.approx(1.23456789)),
++    ],
++)
++def test_floating_point(expression: str, expected: float) -> None:
++    assert evaluate(expression) == expected
++
++
++def test_whitespace_is_ignored() -> None:
++    assert evaluate("  1.5e2\t+\n2 * 3  ") == 156.0
++
++
++def test_result_is_float() -> None:
++    assert isinstance(evaluate("1 + 2"), float)
++
++
++@pytest.mark.parametrize(
++    "expression",
++    [
++        "",
++        "   ",
++        "1 +",
++        "* 2",
++        "(1 + 2",
++        "1 + 2)",
++        "1 2",
++        "1e",
++        "1e+",
++        "abc",
++        "1 + $2",
++        "()",
++    ],
++)
++def test_invalid_expressions_raise(expression: str) -> None:
++    with pytest.raises(ExpressionError):
++        evaluate(expression)
++
++
++def test_division_by_zero_raises() -> None:
++    with pytest.raises(ExpressionError):
++        evaluate("1 / 0")
++
++
++def test_non_string_input_raises() -> None:
++    with pytest.raises(TypeError):
++        evaluate(123)  # type: ignore[arg-type]

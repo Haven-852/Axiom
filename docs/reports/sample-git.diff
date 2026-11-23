@@ -1,0 +1,65 @@
+diff --git a/calculator.py b/calculator.py
+index 03b5693..9997b73 100644
+--- a/calculator.py
++++ b/calculator.py
+@@ -1,6 +1,31 @@
+-def add(left: float, right: float) -> float:
+-    return left + right
+-
+-
+-def evaluate(expression: str) -> float:
+-    raise NotImplementedError(expression)
++"""Small expression calculator. Scientific notation is accepted by the literal parser."""
++
++import ast
++
++
++_ALLOWED = (
++    ast.Expression,
++    ast.BinOp,
++    ast.UnaryOp,
++    ast.Constant,
++    ast.Add,
++    ast.Sub,
++    ast.Mult,
++    ast.Div,
++    ast.Pow,
++    ast.Mod,
++    ast.UAdd,
++    ast.USub,
++)
++
++
++def evaluate(expression: str) -> float:
++    """Evaluate a numeric expression, including scientific notation such as 1.5e2."""
++    rewritten = expression.replace("^", "**")
++    tree = ast.parse(rewritten, mode="eval")
++    for node in ast.walk(tree):
++        if not isinstance(node, _ALLOWED):
++            raise ValueError(f"unsupported syntax: {type(node).__name__}")
++        if isinstance(node, ast.Constant) and not isinstance(node.value, (int, float)):
++            raise ValueError("only numbers are allowed")
++    return float(eval(compile(tree, "<calculator>", "eval"), {"__builtins__": {}}, {}))
+diff --git a/test_calculator.py b/test_calculator.py
+index 93037ca..800abf3 100644
+--- a/test_calculator.py
++++ b/test_calculator.py
+@@ -1,12 +1,6 @@
+-import pytest
+-
+-from calculator import add, evaluate
+-
+-
+-def test_add() -> None:
+-    assert add(1, 2) == 3
+-
+-
+-def test_scientific_notation_is_not_implemented() -> None:
+-    with pytest.raises(NotImplementedError):
+-        evaluate("1.5e2")
++from calculator import evaluate
++
++
++def test_scientific_notation() -> None:
++    assert evaluate("1.5e2 + 2") == 152
++    assert evaluate("2.5E-1 * 4") == 1

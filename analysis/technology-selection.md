@@ -1,5 +1,7 @@
 # 技术选型与二次开发方案
 
+> 本文是源码分析阶段的实现建议。V1 的待批准决定见 `docs/adr/0001-ase-v1-control-plane.md`：不再自建终端、Workspace 和 worktree 命令，改为调用已发布的 Agent Server，并用 Agent Canvas 的组件做 Web。下文在该 ADR 批准后只保留「为什么选 SDK」的分析，不再作为施工说明。
+
 ## 决定
 
 ASE 的基础项目是 **OpenHands/software-agent-sdk**（分析提交 `885242b563b1d2695d6c7b3d4bfe642f1c8838a3`，包版本 1.63.1，MIT）。

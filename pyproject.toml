@@ -1,0 +1,38 @@
+[project]
+name = "ase"
+version = "0.1.0"
+description = "ASE control plane: LangGraph workflow over an OpenHands coding runtime"
+requires-python = ">=3.12"
+dependencies = [
+    "alembic>=1.14",
+    "fastapi>=0.115",
+    "httpx>=0.28",
+    "langgraph>=0.4",
+    "pydantic-settings>=2.6",
+    "pydantic>=2.10",
+    "sqlalchemy>=2.0",
+    "uvicorn>=0.32",
+]
+
+[project.optional-dependencies]
+postgres = ["psycopg[binary]>=3.2", "psycopg-pool>=3.2", "langgraph-checkpoint-postgres>=3.2"]
+openhands = ["openhands-sdk==1.63.1", "openhands-tools==1.63.1"]
+dev = ["pytest>=8.3", "httpx>=0.28", "langgraph-checkpoint-sqlite>=3.1"]
+
+[project.scripts]
+ase-api = "ase.main:main"
+
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100

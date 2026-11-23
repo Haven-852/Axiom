@@ -1,0 +1,198 @@
+{
+  "status": "delivered",
+  "events": [
+    {
+      "id": "d247e1f6-15e4-4fed-a8a0-4ee0b7e347f9",
+      "created_at": "2026-11-22T06:51:20.161992",
+      "updated_at": "2026-11-22T06:51:20.161992",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Workflow Started",
+      "source": "ase",
+      "payload": {
+        "requirement_id": "fe81f1b6-3248-48d9-ac2e-ac9613bae138"
+      }
+    },
+    {
+      "id": "fcdf12fa-df03-4bff-adcf-c84b55583034",
+      "created_at": "2026-11-22T06:51:20.173630",
+      "updated_at": "2026-11-22T06:51:20.173630",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Requirement Analyzed",
+      "source": "ase",
+      "payload": {
+        "analysis_id": "f2f6eadf-3746-4a16-8321-f2890574b210"
+      }
+    },
+    {
+      "id": "4149f1d3-1adf-4eb0-896d-7ab9fc826bb8",
+      "created_at": "2026-11-22T06:51:20.194783",
+      "updated_at": "2026-11-22T06:51:20.194783",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Plan Generated",
+      "source": "ase",
+      "payload": {
+        "plan_id": "7ef8fbe4-21e8-4033-ad53-19a436863818"
+      }
+    },
+    {
+      "id": "8a2da0bf-6bbd-4bfa-af4f-78ae7d10d87a",
+      "created_at": "2026-11-22T06:51:20.210119",
+      "updated_at": "2026-11-22T06:51:20.210119",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Approval Requested",
+      "source": "ase",
+      "payload": {
+        "approval_id": "351c7769-bcb7-4da6-8e8f-d617404ee895"
+      }
+    },
+    {
+      "id": "525904ce-0822-4fdc-9c6c-851d04256cbf",
+      "created_at": "2026-11-22T06:51:20.230966",
+      "updated_at": "2026-11-22T06:51:20.230966",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Approval Completed",
+      "source": "langgraph",
+      "payload": {
+        "approval_id": "351c7769-bcb7-4da6-8e8f-d617404ee895",
+        "decision": "approved"
+      }
+    },
+    {
+      "id": "749962b1-952f-4bff-9cce-8aa0b731f7e7",
+      "created_at": "2026-11-22T06:51:20.739485",
+      "updated_at": "2026-11-22T06:51:20.739488",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Workspace Created",
+      "source": "ase",
+      "payload": {
+        "workspace_id": "8d06095a-0983-4ead-823d-b90415b2afa3",
+        "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+        "task_id": "c78f9f3e-10db-453b-b597-fdf1c7a25a1a",
+        "path": "C:\\Users\\Administrator\\AppData\\Local\\Temp\\tmp3d6ohzie\\workspaces\\016e8b7b-3cf9-447b-81a5-05e2fb9bdf55\\c78f9f3e-10db-453b-b597-fdf1c7a25a1a",
+        "branch": "ase/c78f9f3e-10db-453b-b597-fdf1c7a25a1a",
+        "base_ref": "HEAD"
+      }
+    },
+    {
+      "id": "4e87dcde-762c-4b65-9507-3e7d787313d4",
+      "created_at": "2026-11-22T06:51:20.772063",
+      "updated_at": "2026-11-22T06:51:20.772064",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": "c78f9f3e-10db-453b-b597-fdf1c7a25a1a",
+      "execution_id": "029c00d8-fbf2-4e4d-be91-b0e657ab4cce",
+      "event_type": "Agent Started",
+      "source": "ase",
+      "payload": {
+        "session_id": "26c290f7-4933-461c-9644-d6d18c3f2318",
+        "runtime": "scripted"
+      }
+    },
+    {
+      "id": "f692f476-f561-4a12-86eb-3ac611382b77",
+      "created_at": "2026-11-22T06:51:20.772121",
+      "updated_at": "2026-11-22T06:51:20.772122",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": "c78f9f3e-10db-453b-b597-fdf1c7a25a1a",
+      "execution_id": "029c00d8-fbf2-4e4d-be91-b0e657ab4cce",
+      "event_type": "Code Changed",
+      "source": "ase",
+      "payload": {
+        "type": "code_changed",
+        "path": "calculator.py",
+        "task_id": "c78f9f3e-10db-453b-b597-fdf1c7a25a1a"
+      }
+    },
+    {
+      "id": "539e80c7-f6e2-4a10-a0c1-651a91fc920e",
+      "created_at": "2026-11-22T06:51:20.782540",
+      "updated_at": "2026-11-22T06:51:20.782541",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Test Started",
+      "source": "docker",
+      "payload": {
+        "execution_id": "029c00d8-fbf2-4e4d-be91-b0e657ab4cce"
+      }
+    },
+    {
+      "id": "19e714a3-1a76-4246-b127-4a186b2274cf",
+      "created_at": "2026-11-22T06:51:27.180962",
+      "updated_at": "2026-11-22T06:51:27.180964",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": "029c00d8-fbf2-4e4d-be91-b0e657ab4cce",
+      "event_type": "Test Completed",
+      "source": "docker",
+      "payload": {
+        "passed": true,
+        "exit_code": 0,
+        "command": [
+          "E:\\demo\\Axiom\\.venv\\Scripts\\python.exe",
+          "-m",
+          "pytest",
+          "-q"
+        ],
+        "output": "host fallback after docker unavailable: docker image is not available\n.                                                                        [100%]\n1 passed in 0.01s\n"
+      }
+    },
+    {
+      "id": "cd7a7300-1122-420b-b2ea-b932d272c0f6",
+      "created_at": "2026-11-22T06:51:27.606415",
+      "updated_at": "2026-11-22T06:51:27.606415",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Evaluation Completed",
+      "source": "ase",
+      "payload": {
+        "id": "a2305cb8-8a26-4579-a390-e9834e4218e9",
+        "created_at": "2026-11-22T06:51:27.604682Z",
+        "updated_at": "2026-11-22T06:51:27.604684Z",
+        "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+        "passed": true,
+        "summary": "测试通过且存在代码差异",
+        "findings": []
+      }
+    },
+    {
+      "id": "2377fba2-71cb-4ab8-b76d-9e673b35e61b",
+      "created_at": "2026-11-22T06:51:28.363602",
+      "updated_at": "2026-11-22T06:51:28.363603",
+      "project_id": "016e8b7b-3cf9-447b-81a5-05e2fb9bdf55",
+      "workflow_id": "690f09de-84c6-4f9e-8a89-d6da63483564",
+      "task_id": null,
+      "execution_id": null,
+      "event_type": "Delivery Completed",
+      "source": "ase",
+      "payload": {
+        "artifact_id": "8544eeb7-44bf-4213-924e-4a33318ffdd5",
+        "commit": "96080427ea982f5e987b40def9b7ccc36e2a19a6",
+        "passed": true
+      }
+    }
+  ]
+}
