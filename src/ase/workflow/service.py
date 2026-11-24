@@ -15,6 +15,7 @@ from ase.store import (
     get_approval,
     get_project,
     get_workflow,
+    list_artifacts,
     list_events,
     list_executions_for_workflow,
     save_event,
@@ -73,8 +74,11 @@ class WorkflowService:
     def resume(self, workflow_id: str, decision: str, comment: str) -> dict:
         with session_scope(self.ctx.sessions) as session:
             row = get_workflow(session, workflow_id)
+            plan_managed = any(item.kind == "plan_version" for item in list_artifacts(session, workflow_id))
         if row is not None and row.status == WorkflowStatus.CANCELLED.value:
             raise WorkflowConflict("workflow is cancelled")
+        if plan_managed:
+            raise WorkflowConflict("plan-managed workflow uses the coding task entry, not the legacy coding graph")
         self._invoke(Command(resume={"decision": decision, "comment": comment}), workflow_id)
         return self.snapshot(workflow_id)
 

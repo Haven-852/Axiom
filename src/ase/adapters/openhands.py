@@ -57,6 +57,12 @@ class OpenHandsCodingAdapter(CodingAgentAdapter):
         self._conversations: dict[str, Any] = {}
         self._sessions: dict[str, AgentSession] = {}
         self._status: dict[str, str] = {}
+        self.on_step = None
+
+    def _notify(self, conversation: Any) -> None:
+        if self.on_step is None:
+            return
+        self.on_step(str(conversation.id), _event_payloads(conversation, secret_value(self.settings)))
 
     async def create_session(self, workspace_path: str) -> AgentSession:
         path = assert_workspace_allowed(Path(workspace_path), self.settings)
@@ -113,11 +119,25 @@ class OpenHandsCodingAdapter(CodingAgentAdapter):
         else:
             sdk_workspace = LocalWorkspace(working_dir=str(workspace))
         requested = uuid.UUID(task.conversation_id) if task.conversation_id else None
-        conversation = _open_conversation(agent, sdk_workspace, self.settings.openhands_max_iterations, requested)
+        holder: dict[str, Any] = {}
+
+        def _on_event(_event: Any) -> None:
+            current = holder.get("conversation")
+            if current is not None:
+                self._notify(current)
+
+        conversation = _open_conversation(
+            agent,
+            sdk_workspace,
+            self.settings.openhands_max_iterations,
+            requested,
+            _on_event,
+        )
+        holder["conversation"] = conversation
         self._conversations[session.session_id] = conversation
         self._status[session.session_id] = "running"
         try:
-            conversation, status_name = _drive(conversation, task, remote, self, session.session_id)
+            conversation, status_name = _drive(conversation, task, remote, self, session.session_id, self._notify)
         except Exception as exc:
             if not remote or not _is_disconnect(exc):
                 raise
@@ -132,7 +152,9 @@ class OpenHandsCodingAdapter(CodingAgentAdapter):
                 sdk_workspace,
                 self.settings.openhands_max_iterations,
                 uuid.UUID(str(conversation.id)),
+                _on_event,
             )
+            holder["conversation"] = conversation
             self._conversations[session.session_id] = conversation
             if not _has_user_message(conversation):
                 return AgentRunResult(
@@ -142,7 +164,7 @@ class OpenHandsCodingAdapter(CodingAgentAdapter):
                     error="interrupted",
                     conversation_id=str(conversation.id),
                 )
-            conversation, status_name = _drive(conversation, task, remote, self, session.session_id)
+            conversation, status_name = _drive(conversation, task, remote, self, session.session_id, self._notify)
         events = _event_payloads(conversation, secret_value(self.settings))
         usage = _usage(conversation)
         if usage:
@@ -217,7 +239,7 @@ def _coding_tools() -> list[Any]:
     return [Tool(name="file_editor"), Tool(name="terminal")]
 
 
-def _open_conversation(agent: Any, workspace: Any, max_iterations: int, conversation_id: uuid.UUID | None) -> Any:
+def _open_conversation(agent: Any, workspace: Any, max_iterations: int, conversation_id: uuid.UUID | None, on_event=None) -> Any:
     from openhands.sdk import Conversation
 
     return Conversation(
@@ -225,6 +247,7 @@ def _open_conversation(agent: Any, workspace: Any, max_iterations: int, conversa
         workspace=workspace,
         max_iteration_per_run=max_iterations,
         conversation_id=conversation_id,
+        callbacks=[on_event] if on_event is not None else None,
     )
 
 
@@ -246,7 +269,7 @@ def _install_policy(conversation: Any) -> None:
     conversation.set_confirmation_policy(ConfirmRisky(threshold=SecurityRisk.MEDIUM, confirm_unknown=True))
 
 
-def _drive(conversation: Any, task: AgentTaskRequest, remote: bool, adapter: OpenHandsCodingAdapter, session_id: str) -> tuple[Any, str]:
+def _drive(conversation: Any, task: AgentTaskRequest, remote: bool, adapter: OpenHandsCodingAdapter, session_id: str, on_step) -> tuple[Any, str]:
     status_name = _status_name(conversation)
     if not _has_user_message(conversation):
         if remote:
@@ -259,6 +282,7 @@ def _drive(conversation: Any, task: AgentTaskRequest, remote: bool, adapter: Ope
             conversation.run()
             status_name = _status_name(conversation)
             adapter._status[session_id] = status_name
+            on_step(conversation)
             if status_name == "waiting_for_confirmation":
                 conversation.reject_pending_actions("ASE policy denied this tool action")
                 continue

@@ -8,8 +8,9 @@ ASE 是自主研发流程的控制面。Phase 1 用 FastAPI 和 LangGraph 编排
 - Phase 2.2 Planning Agent 生成 Plan 和 Task DAG。Workflow 终态是 `planned`。
 - Phase 2.3 保存澄清回答、Plan 版本和人工审批。`planned` 不是 `approved`。
 - Phase 2.4 只对当前已批准的 Plan 提供显式编码入口。资格门禁在 CodingAgent 之前执行。未批准的计划不会创建 Execution。
+- Phase 2.5 用独立仓库完成了一次真实 DeepSeek 编码、容器内 pytest、评估和交付。带 Plan Version 的 Workflow 不能从旧生产图恢复进入编码。
 
-编码入口是 `POST /api/v1/workflows/{workflow_id}/coding-tasks/{task_id}`，请求头 `X-ASE-API-KEY`。它使用独立的 LangGraph 线程，不恢复生产编码图。
+编码入口是 `POST /api/v1/workflows/{workflow_id}/coding-tasks/{task_id}`，请求头 `X-ASE-API-KEY`。它使用独立的 LangGraph 线程，不恢复生产编码图。已有 Plan Version 时，旧批准接口的 resume 返回 409。
 
 七个上游仓库的源码分析在 `analysis/`：
 

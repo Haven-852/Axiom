@@ -19,6 +19,8 @@
 
 `planned` 不是批准。`ready` 也不是执行授权。calculator Workflow `1dd7c84d-36d1-4dcb-a66e-1004e0a1985f` 的 Version 2 没有批准，因此它的 ready 任务同样被拒绝。
 
+已有 Plan Version 的 Workflow 不能通过旧生产图的 `resume` 进入编码。没有 Plan Version 的历史工作流仍恢复旧图。细节见 `docs/reports/phase-2.5-production-entry-audit.md`。
+
 ## 并发
 
 领取和检查在同一个事务里对 Workflow 行加锁，然后把任务从 `ready` 改成 `in_progress`。PostgreSQL 上再对任务使用 `pg_try_advisory_lock`，锁住实际执行过程。另一个请求得到冲突。SQLite 会忽略行锁，并发测试放在 PostgreSQL。

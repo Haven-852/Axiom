@@ -65,6 +65,7 @@ class CodingAgent(BaseAgent):
                     allow_claimed=True,
                 )
             input_data = {**input_data, "instruction": parsed.instruction, "workspace_path": parsed.workspace_path, "task_id": parsed.task_id}
+        self._prepare_runtime(input_data.get("workspace_path") or "")
         service = ExecutionService(self.adapter, self.sessions)
         execution, outcome = await service.run_claimed(
             project_id=context.project_id,
@@ -90,3 +91,12 @@ class CodingAgent(BaseAgent):
             execution_ids=[execution.id],
             error_message=outcome.error,
         )
+
+    def _prepare_runtime(self, workspace_path: str) -> None:
+        containers = getattr(self.adapter, "containers", None)
+        if containers is None or getattr(self.adapter, "_llm", None) is not None or not workspace_path:
+            return
+        from pathlib import Path
+
+        handle = containers.start(Path(workspace_path))
+        self.adapter.last_container_id = handle.container_id

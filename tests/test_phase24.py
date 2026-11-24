@@ -8,7 +8,7 @@ from ase.app import build_context, create_app
 from ase.contracts.domain import Approval, ApprovalStatus, DevelopmentPlan, EvaluationReport, Project, Requirement, Task, TaskStatus
 from ase.contracts.domain import TestResult as SavedTestResult
 from ase.contracts.domain import new_id
-from ase.db.orm import ExecutionRow
+from ase.db.orm import ExecutionEventRow, ExecutionRow
 from ase.db.session import session_scope
 from ase.errors import WorkflowConflict
 from ase.execution.eligibility import EligibilityError
@@ -219,6 +219,13 @@ def test_approved_task_runs_once_and_completion_needs_evidence(settings) -> None
         executions = session.scalar(select(func.count()).select_from(ExecutionRow))
     assert task.status == TaskStatus.IN_PROGRESS
     assert executions == 1
+    with session_scope(ctx.sessions) as session:
+        row = session.get(ExecutionRow, started["execution_id"])
+        event_count = session.scalar(
+            select(func.count()).select_from(ExecutionEventRow).where(ExecutionEventRow.execution_id == started["execution_id"])
+        )
+    assert row.conversation_id
+    assert event_count >= 1
     again = service.start_task(workflow_id, task_id, str(workspace))
     with session_scope(ctx.sessions) as session:
         assert session.scalar(select(func.count()).select_from(ExecutionRow)) == 1
@@ -237,6 +244,17 @@ def test_approved_task_runs_once_and_completion_needs_evidence(settings) -> None
         assert get_task(session, task_id).status == TaskStatus.COMPLETED
     graph = build_graph(None)
     assert "diagnose" in graph.nodes and "repair" in graph.nodes
+
+
+def test_legacy_resume_does_not_code_a_plan_managed_workflow(settings) -> None:
+    from ase.workflow.service import WorkflowService
+
+    ctx, _service, workflow_id, _task_id, _plan_model = _approved(settings)
+    try:
+        WorkflowService(ctx).resume(workflow_id, "approved", "legacy approval")
+        raise AssertionError("expected plan-managed workflow to stay out of the legacy graph")
+    except WorkflowConflict as exc:
+        assert "plan-managed" in str(exc)
 
 
 def test_coding_api_requires_approval(settings) -> None:

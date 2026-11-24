@@ -6,7 +6,7 @@
 
 `CodingInput` 包含 Workflow、Plan 版本、Artifact、Hash、任务说明、验收标准、相对路径、研究证据、依赖、仓库修订和用户决策。绝对路径和 `..` 会被拒绝。如果给出了仓库修订，而 `git rev-parse HEAD` 已经变化，执行停止。
 
-上下文写明要做什么、不要做什么、验收标准、用户原句和这些约束：不改无关文件，不改 ASE 生产代码，不读密钥，不合并主分支，不降低测试，不自行决定未确认需求。
+上下文写明要做什么、不要做什么、验收标准、用户原句和这些约束：不改无关文件，不改 ASE 生产代码，不读密钥，不合并主分支，不降低测试，不自行决定未确认需求。还要求只使用列出的相对路径，不浏览工作区父目录，先改文件再结束。Phase 2.4 的真实模型把迭代花在浏览父目录上，没有改到文件。
 
 没有 `plan_id` 的旧调用仍然委托给 `ExecutionService`。那是 Phase 2.0 的适配器复用测试。新的受控入口总会带上计划字段，并在 Agent 内再次执行资格检查。
 
@@ -14,7 +14,7 @@
 
 显式请求进入独立 LangGraph 线程 `{workflow_id}:coding:{task_id}`。这条线程不使用生产编码图的 thread id，也不会从 `planned` 自动开始。
 
-资格检查通过后领取任务，Agent Runner 调用 CodingAgent，CodingAgent 调用现有 `ExecutionService.run_claimed`。OpenHands SDK 仍然只由 `src/ase/adapters/openhands.py` 导入。Execution 和 AgentRun 通过现有 `agent_run_executions` 关联。Attempt 仍是 `execution_operations`。相同 operation 已完成时复用结果和 Conversation id。
+资格检查通过后领取任务，Agent Runner 调用 CodingAgent，CodingAgent 调用现有 `ExecutionService.run_claimed`。远程运行时会先准备或接管已有 Agent 容器。OpenHands SDK 仍然只由 `src/ase/adapters/openhands.py` 导入。Execution 和 AgentRun 通过现有 `agent_run_executions` 关联。Attempt 仍是 `execution_operations`。调用模型前会写入 Conversation ID。OpenHands 的事件回调在 `conversation.run()` 进行期间把事件写入 `execution_events`。能从运行时统计中解析出的 token 计数写入 ModelUsage，解析不到时不编造。失败原因写入 Execution.error。相同 operation 已完成时复用结果和 Conversation id。进程在 operation 仍为 running 时中断后，下一次调用继续同一个 Execution 和 Conversation。默认迭代上限仍是 40，并受超时限制。
 
 ## 完成
 
